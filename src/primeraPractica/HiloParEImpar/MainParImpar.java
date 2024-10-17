@@ -1,6 +1,6 @@
 package primeraPractica.HiloParEImpar;
 
-public class MainPrImpar {
+public class MainParImpar {
     public static void main(String[] args) {
         Par hiloPar = new Par();
         Impar hiloImpar = new Impar();
