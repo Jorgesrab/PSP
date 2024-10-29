@@ -1,7 +1,7 @@
 package primeraPractica.ParImparSincro1;
 
-public class Par extends Thread {
-    public Par() {
+public class ParS extends Thread {
+    public ParS() {
     }
 
     @Override
