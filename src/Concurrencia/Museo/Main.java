@@ -23,46 +23,51 @@ class Turista implements Runnable {
         this.museo = museo;
     }
 
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+
     @Override
     public void run() {
         Thread.currentThread().setName("Turista " + id);
         try {
-            entrarPuertaDoble();
-            entrarMuseo();
-            entrarSalaEspecial();
-            salirSalaEspecial();
-            salirMuseo();
+
+            // Intentar entrar a través de la puerta doble
+            Thread.sleep((long) (Math.random() * 3000));
+            museo.puertaDoble.acquire();
+            System.out.println(Thread.currentThread().getName() + " ha entrado en la puerta doble (Permisos disponibles en puerta doble: " + museo.puertaDoble.availablePermits() + ")");
+
+            // Adquirir acceso al museo
+            museo.aforo.acquire();
+            museo.puertaDoble.release();
+            System.out.println(Thread.currentThread().getName() + " ha entrado en el museo y ha salido de la puerta doble (Permisos disponibles en aforo: " + museo.aforo.availablePermits() + ", puerta doble: " + museo.puertaDoble.availablePermits() + ")");
+
+            // Intentar entrar a la sala especial
+            museo.salaEspecial.acquire();
+            System.out.println(Thread.currentThread().getName() + " ha entrado en la sala especial (Permisos disponibles en sala especial: " + museo.salaEspecial.availablePermits() + ")");
+
+            // Simular tiempo en la sala especial
+            Thread.sleep((long) (Math.random() * 3000));
+
+            // Salir de la sala especial
+            museo.salaEspecial.release();
+            System.out.println(Thread.currentThread().getName() + " ha salido de la sala especial (Permisos disponibles en sala especial después de liberar: " + museo.salaEspecial.availablePermits() + ")");
+
+            // Simular tiempo en el museo antes de salir
+            Thread.sleep((long) (Math.random() * 30000));
+
+            // Salir del museo
+            museo.aforo.release();
+            System.out.println(Thread.currentThread().getName() + " ha salido del museo (Permisos disponibles en aforo después de liberar: " + museo.aforo.availablePermits() + ")");
+
         } catch (InterruptedException e) {
-            System.err.println(Thread.currentThread().getName() + " fue interrumpido: " + e.getMessage());
+            throw new RuntimeException(e);
         }
-    }
-
-    private void entrarPuertaDoble() throws InterruptedException {
-        museo.puertaDoble.acquire();
-        System.out.println(Thread.currentThread().getName() + " ha entrado en la puerta doble (Permisos disponibles en puerta doble: " + museo.puertaDoble.availablePermits() + ")");
-    }
-
-    private void entrarMuseo() throws InterruptedException {
-        museo.aforo.acquire();
-        museo.puertaDoble.release();
-        System.out.println(Thread.currentThread().getName() + " ha entrado en el museo y ha salido de la puerta doble (Permisos disponibles en aforo: " + museo.aforo.availablePermits() + ", puerta doble: " + museo.puertaDoble.availablePermits() + ")");
-    }
-
-    private void entrarSalaEspecial() throws InterruptedException {
-        museo.salaEspecial.acquire();
-        System.out.println(Thread.currentThread().getName() + " ha entrado en la sala especial (Permisos disponibles en sala especial: " + museo.salaEspecial.availablePermits() + ")");
-        Thread.sleep((long) (Math.random() * 1000)); // Simular tiempo en la sala especial
-    }
-
-    private void salirSalaEspecial() throws InterruptedException {
-        museo.salaEspecial.release();
-        System.out.println(Thread.currentThread().getName() + " ha salido de la sala especial (Permisos disponibles en sala especial después de liberar: " + museo.salaEspecial.availablePermits() + ")");
-    }
-
-    private void salirMuseo() throws InterruptedException {
-        Thread.sleep((long) (Math.random() * 500)); // Simular tiempo en el museo antes de salir
-        museo.aforo.release();
-        System.out.println(Thread.currentThread().getName() + " ha salido del museo (Permisos disponibles en aforo después de liberar: " + museo.aforo.availablePermits() + ")");
     }
 }
 
@@ -72,10 +77,20 @@ class Turista implements Runnable {
 public class Main {
     public static void main(String[] args) {
         Museo museo = new Museo();
+        int numeroTuristas=10;
+        Thread[] turistas = new Thread[numeroTuristas];
 
-        for (int i = 0; i < 10; i++) {
-            Turista turista = new Turista(i, museo);
-            new Thread(turista).start();
+        for (int i = 0; i < numeroTuristas; i++) {
+            turistas[i]=new Thread(new Turista(i, museo));
+            turistas[i].start();
+
+        }
+        for (Thread turista: turistas) {
+            try {
+                turista.join();
+            }catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
 
         }
     }
