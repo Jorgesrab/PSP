@@ -106,7 +106,7 @@ class Turista implements Runnable {
 
 
 
-public class MainMonitorSemaforo {
+public class  MainMonitorSemaforo {
     public static void main(String[] args) {
 
     }
