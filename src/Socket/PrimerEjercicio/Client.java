@@ -5,7 +5,7 @@ import java.net.*;
 
 public class Client {
     public static void main(String[] args) {
-        String host = "localhost"; // Dirección del servidor
+        String host = "192.168.137.204"; // Dirección del servidor
         int port = 12345; // Puerto del servidor
 
         try (Socket socket = new Socket(host, port)) {
